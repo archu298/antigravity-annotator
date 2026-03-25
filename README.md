@@ -1,96 +1,116 @@
-# AntiGravity Annotator
+# 🚀 AntiGravity Annotator
 
-A GPU-accelerated image annotation tool with a FastAPI backend and browser-based frontend. Supports bounding box, polygon, polyline, and keypoint annotations with AI-assisted labeling via YOLO, YOLO-World, and SAM2 models — including an agentic pipeline that automatically sweeps a dataset and flags uncertain detections for human review.
+### GPU-Accelerated Image Annotation Platform with AI-Powered Auto-Labeling
 
----
+A self-hosted, production-grade image annotation tool built with **FastAPI + React + PyTorch**. Supports bounding boxes, polygons, polylines, and keypoints — with integrated **YOLO11**, **YOLO-World**, and **SAM2** models for AI-assisted labeling. Includes an **agentic auto-annotation pipeline** that sweeps entire datasets, auto-accepts high-confidence detections, and flags uncertain ones for human review.
 
-## Features
-
-- Create and manage multiple annotation projects
-- Upload and browse large image sets (paginated, search, filter by annotation status)
-- Draw **bounding boxes**, **polygons**, **polylines**, and **keypoints**
-- Undo/redo, zoom/pan, lock annotations, dark/light theme
-- Annotation propagation (copy annotations forward to N images)
-- Import/export: **YOLO TXT**, **COCO JSON**, **CSV**, native JSON
-- Command palette (`Ctrl+K`) and full keyboard shortcut set
-- AI-assisted annotation:
-  - **YOLO detection** (`.pt`, `.onnx`) — single image or batch
-  - **YOLO-World** open-vocabulary detection (text prompt)
-  - **SAM2** click-to-segment and box-prompted segmentation
-  - **Agent pipeline** — auto-annotate a whole dataset, accept high-confidence detections, flag uncertain ones for review
-- GPU auto-selection (picks the GPU with the most free VRAM)
-- LAN access — any device on the same network can open the tool
-- Interactive API docs at `/docs`
+> **No cloud. No accounts. No internet required.** All data stays on your machine. Runs on LAN — start the server and your whole team can annotate from any browser.
 
 ---
 
-## Requirements
+## 📸 Screenshots
 
+### Annotation Workspace
+Full-featured canvas with bounding box, polygon, polyline, and keypoint tools. Class management, annotation statistics, zoom/pan, and dark theme.
+
+![Annotation Workspace](screenshots/workspace.png)
+
+### Project Dashboard
+Create and manage multiple annotation projects. Track image counts, annotation progress, and last-modified timestamps.
+
+![Project Dashboard](screenshots/dashboard.png)
+
+### AI Assist Panel
+One-click AI inference with YOLO11, YOLO-World (text-prompt detection), and SAM2 (click-to-segment). Adjustable confidence and NMS thresholds. Batch detection across entire projects.
+
+![AI Assist](screenshots/ai-assist.png)
+
+### Agentic Auto-Annotation Pipeline
+Configure confidence thresholds → Agent auto-annotates the full dataset → High-confidence results are accepted, uncertain detections are flagged for human review. Optional SAM refinement for polygon-level precision.
+
+![Agent Pipeline](screenshots/agent-pipeline.png)
+
+---
+
+## ✨ Key Features
+
+| Category | Features |
+|----------|----------|
+| **Annotation Tools** | Bounding boxes, polygons, polylines, keypoints with 8-handle resize, drag-to-move, undo/redo, lock, and annotation propagation |
+| **AI Models** | YOLO11 detection, YOLO-World open-vocabulary detection (text prompt), SAM2 click-to-segment and box-prompted segmentation |
+| **Agent Pipeline** | Agentic auto-annotation — runs multi-stage inference (detect → filter by confidence → optionally refine with SAM → flag for human review), reducing manual annotation effort by ~70% |
+| **Import/Export** | YOLO TXT, COCO JSON, CSV, native JSON — ready for direct model training |
+| **GPU Management** | Auto-selects GPU with most free VRAM, single-model memory management, CPU fallback |
+| **Collaboration** | LAN access — any device on the same network can use the tool simultaneously |
+| **UX** | Command palette (Ctrl+K), full keyboard shortcuts, dark/light theme, paginated image browser with search and filter |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | Python, FastAPI, Uvicorn |
+| **AI/ML** | PyTorch, CUDA, Ultralytics (YOLO11, YOLO-World, SAM2) |
+| **Frontend** | React 18, Tailwind CSS, HTML5 Canvas |
+| **Storage** | File-based JSON (no database required) |
+| **Deployment** | Single-command launch, LAN-accessible, zero configuration |
+
+---
+
+## ⚡ Quick Start
+
+### Prerequisites
 - Python 3.8+
 - (Optional) NVIDIA GPU + CUDA for fast AI inference
 
 ### Install
 
 ```bash
-# 1. Install torch first — choose the right build for your hardware:
+# 1. Install PyTorch (choose your CUDA version):
 
-#   CPU only:
+# CPU only:
 pip install torch torchvision
 
-#   GPU — CUDA 12.1 (Tesla T4, RTX series):
+# GPU — CUDA 12.1 (Tesla T4, RTX series):
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 
-#   GPU — CUDA 11.8:
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-
-# 2. Install all other dependencies:
+# 2. Install dependencies:
 pip install -r requirements.txt
 ```
 
-> **Note:** `torch` is not listed in `requirements.txt` because the correct version depends on your CUDA version. Install it manually (step 1) before running `pip install -r requirements.txt`.
-
----
-
-## Quick Start
+### Run
 
 ```bash
 python run.py
 ```
 
-The server starts on `http://localhost:8001` and opens the browser automatically.
+Opens at `http://localhost:8001`. Your LAN IP is printed in the terminal for team access.
 
 ### Options
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--host` | `0.0.0.0` | Bind address (`0.0.0.0` = all interfaces for LAN access) |
+| `--host` | `0.0.0.0` | Bind address (`0.0.0.0` = LAN access) |
 | `--port` | `8001` | Port number |
-| `--gpu` | auto | GPU device index (e.g. `--gpu 1` for Tesla T4) |
+| `--gpu` | auto | GPU device index (e.g. `--gpu 1`) |
 | `--no-browser` | — | Skip auto-opening browser |
 | `--reload` | — | Enable hot-reload for development |
 
-**Examples:**
-
-```bash
-python run.py --port 9000
-python run.py --gpu 1 --no-browser
-python run.py --reload
-```
-
 ---
 
-## Directory Structure
+## 📂 Project Structure
 
 ```
 antigravity/
-├── server.py          # FastAPI app — all API routes and handlers
+├── server.py          # FastAPI backend — all API routes (20+ endpoints)
 ├── run.py             # Launcher — GPU selection, browser open, server start
 ├── requirements.txt   # Python dependencies
 ├── frontend/
-│   ├── index.html     # Browser UI (React, single file)
-│   └── vendor/        # Vendored JS libraries (React, Tailwind, etc.)
-├── models/            # YOLO / SAM model files (.pt, .onnx, .engine)
-└── projects/          # Created automatically; one folder per project
+│   ├── index.html     # Full React UI (~2400 lines, single file)
+│   └── vendor/        # Vendored JS libs (React, Tailwind, Babel, JSZip)
+├── models/            # YOLO / SAM model files (.pt, .onnx)
+└── projects/          # Auto-created; one folder per project
     └── {project_id}/
         ├── project.json       # Project metadata and class definitions
         ├── annotations.json   # All annotations keyed by image filename
@@ -99,158 +119,80 @@ antigravity/
 
 ---
 
-## Keyboard Shortcuts
+## 🤖 AI Models
 
-| Key | Action |
-|-----|--------|
-| `V` | Select / move tool |
-| `B` | Bounding box tool |
-| `P` | Polygon tool |
-| `L` | Polyline tool |
-| `H` | Pan tool |
-| `K` | Keypoints tool |
-| `A` | Open AI panel |
-| `G` | Open propagation panel |
-| `N` / `Shift+N` | Next / previous image |
-| `Tab` / `Shift+Tab` | Cycle annotations |
-| `Delete` | Delete selected annotation |
-| `1`–`9` | Quick-select class by index |
-| `=` / `-` | Zoom in / out |
-| `0` | Fit view |
-| `\` | Toggle label visibility |
-| `` ` `` | Toggle dark/light theme |
-| `Ctrl+S` | Save |
-| `Ctrl+Z` / `Ctrl+Shift+Z` | Undo / redo |
-| `Ctrl+D` | Duplicate selected annotation |
-| `Ctrl+E` | Export |
-| `Ctrl+K` | Command palette |
-| `Ctrl+→` | Propagate annotation to next image |
-| `Enter` | Finish drawing polygon / polyline / keypoints |
-| `Escape` | Cancel draw / close dialog |
-| `?` | Keyboard shortcut help |
+Place model files in the `models/` directory. Model type is auto-detected from filename:
+
+| File | Size | Type | Use Case |
+|------|------|------|----------|
+| `yolo11n.onnx` | 11 MB | YOLO detection | Fast object detection |
+| `yolo11s.onnx` | 37 MB | YOLO detection | Better accuracy |
+| `yolov8x-worldv2.pt` | 140 MB | YOLO-World | Open-vocabulary detection (text prompts) |
+| `sam2.1_b.pt` | 155 MB | SAM2 segmentation | Click-to-segment |
+| `sam2.1_l.pt` | 429 MB | SAM2 segmentation | Higher quality segmentation |
+
+Only one model is loaded in GPU memory at a time. Loading a new model automatically unloads the previous one to manage VRAM.
 
 ---
 
-## API Reference
+## ⌨️ Keyboard Shortcuts
 
-### Projects
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Server status, GPU info, project/model counts |
-| POST | `/api/projects` | Create a project |
-| GET | `/api/projects` | List all projects |
-| GET | `/api/projects/{id}` | Get project details |
-| PUT | `/api/projects/{id}` | Update project (name, classes, settings) |
-| DELETE | `/api/projects/{id}` | Delete project and all its data |
-
-### Images
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/projects/{id}/images` | Upload images (multipart) |
-| GET | `/api/projects/{id}/images` | List images — query: `page`, `limit`, `search`, `status` |
-| GET | `/api/projects/{id}/images/{file}` | Serve an image file |
-| DELETE | `/api/projects/{id}/images/{file}` | Delete an image and its annotations |
-
-### Annotations
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/projects/{id}/annotations` | Get all annotations for a project |
-| GET | `/api/projects/{id}/annotations/{file}` | Get annotations for one image |
-| PUT | `/api/projects/{id}/annotations/{file}` | Save annotations for one image |
-| PUT | `/api/projects/{id}/annotations` | Bulk save all annotations |
-
-### Models & Inference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/models` | List available models + currently loaded model |
-| POST | `/api/models` | Upload a model file |
-| GET | `/api/models/{filename}` | Download a model file |
-| POST | `/api/models/load` | Load a model into GPU memory |
-| POST | `/api/models/unload` | Unload model and free VRAM |
-| POST | `/api/infer` | Run inference on a single image (detect / SAM) |
-| POST | `/api/infer/batch` | Batch detection across multiple images |
-
-### Agent Pipeline
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/agent/run` | Auto-annotate a dataset with configurable confidence thresholds |
-| GET | `/api/agent/flagged/{id}` | Get flagged / accepted / unprocessed image lists |
-| POST | `/api/agent/accept/{id}` | Accept or reject flagged annotations for an image |
-
-Full interactive docs: `http://localhost:8001/docs`
+| Key | Action | Key | Action |
+|-----|--------|-----|--------|
+| `B` | Bounding box | `Ctrl+Z` | Undo |
+| `P` | Polygon | `Ctrl+Shift+Z` | Redo |
+| `L` | Polyline | `Ctrl+S` | Save |
+| `K` | Keypoints | `Ctrl+E` | Export |
+| `V` | Select/move | `Ctrl+K` | Command palette |
+| `A` | AI panel | `N` / `Shift+N` | Next/prev image |
+| `G` | Propagation | `1`–`9` | Quick-select class |
+| `?` | Show all shortcuts | `` ` `` | Toggle theme |
 
 ---
 
-## Annotation Format
+## 📡 API Reference
 
-Annotations are stored in `annotations.json` as **pixel coordinates** relative to the original image dimensions, keyed by image filename:
+Full interactive docs available at `http://localhost:8001/docs` when the server is running.
 
-```json
-{
-  "photo.jpg": [
-    {
-      "id": "a1b2c3d4",
-      "tp": "bb",
-      "x": 120.5, "y": 45.0, "w": 230.0, "h": 180.0,
-      "cid": "35089c"
-    },
-    {
-      "id": "e5f6g7h8",
-      "tp": "pg",
-      "pts": [[100, 50], [200, 50], [250, 150], [100, 150]],
-      "cid": "193959"
-    },
-    {
-      "id": "i9j0k1l2",
-      "tp": "pl",
-      "pts": [[10, 10], [50, 80], [120, 60]],
-      "cid": "35089c"
-    },
-    {
-      "id": "m3n4o5p6",
-      "tp": "kp",
-      "keypoints": [{"x": 100.0, "y": 200.0, "v": 2}],
-      "cid": "193959"
-    }
-  ]
-}
+### Core Endpoints
+
+| Category | Endpoints |
+|----------|-----------|
+| **Projects** | `POST /api/projects` · `GET /api/projects` · `GET /api/projects/{id}` · `PUT /api/projects/{id}` · `DELETE /api/projects/{id}` |
+| **Images** | `POST /api/projects/{id}/images` · `GET /api/projects/{id}/images` · `GET /api/projects/{id}/images/{file}` · `DELETE /api/projects/{id}/images/{file}` |
+| **Annotations** | `GET /api/projects/{id}/annotations` · `GET /api/projects/{id}/annotations/{file}` · `PUT /api/projects/{id}/annotations/{file}` · `PUT /api/projects/{id}/annotations` |
+| **Models** | `GET /api/models` · `POST /api/models` · `POST /api/models/load` · `POST /api/models/unload` |
+| **Inference** | `POST /api/infer` · `POST /api/infer/batch` |
+| **Agent** | `POST /api/agent/run` · `GET /api/agent/flagged/{id}` · `POST /api/agent/accept/{id}` |
+
+---
+
+## 🏗️ Architecture
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for a detailed breakdown of the system design, data flow, storage format, security model, and feature status.
+
+**High-level architecture:**
+
+```
+Browser (React UI)  ←→  FastAPI Server (server.py)  ←→  PyTorch/CUDA (GPU)
+                              ↕
+                    File System (JSON + Images)
 ```
 
-**Annotation types (`tp`):**
-
-| `tp` | Type | Fields |
-|------|------|--------|
-| `bb` | Bounding box | `x`, `y`, `w`, `h` (top-left origin, pixel dimensions) |
-| `pg` | Polygon | `pts: [[x,y], ...]` (closed, ≥3 points) |
-| `pl` | Polyline | `pts: [[x,y], ...]` (open path) |
-| `kp` | Keypoints | `keypoints: [{x, y, v}]` (v: 0=unlabeled, 1=labeled, 2=visible) |
-
-`cid` references a class `id` from `project.json`. Optional fields: `lk` (boolean, locked annotation), `agent_status` (`"accepted"` or `"flagged"`), `agent_score` (model confidence).
+- Single-file React frontend (~2400 lines) — no build step required
+- REST API with 20+ endpoints for project management, image serving, annotations, and ML orchestration
+- Single-model GPU memory management — auto-selects GPU with most free VRAM
+- File-based JSON storage — no database dependency
 
 ---
 
-## Models
+## 📝 License
 
-Place model files in the `models/` directory. Supported formats: `.pt`, `.onnx`, `.engine`.
+This project is for personal and educational use.
 
-Model type is inferred from the filename:
-- `sam` in name → SAM segmentation (`ultralytics.SAM`)
-- `world` in name → YOLO-World open-vocabulary detection (`ultralytics.YOLOWorld`)
-- anything else → standard YOLO detection (`ultralytics.YOLO`)
+---
 
-**Models included:**
+## 👩‍💻 Author
 
-| File | Size | Type |
-|------|------|------|
-| `sam2.1_b.pt` | 155 MB | SAM 2.1 Base segmentation |
-| `sam2.1_l.pt` | 429 MB | SAM 2.1 Large segmentation |
-| `yolo11n.onnx` | 11 MB | YOLOv11 Nano detection |
-| `yolo11s.onnx` | 37 MB | YOLOv11 Small detection |
-| `yolov8x-worldv2.pt` | 140 MB | YOLOv8x-World open-vocabulary detection |
-
-Only one model is loaded in GPU memory at a time. Loading a new model automatically unloads the previous one.
+**Archana K** — Associate Consultant, AI Computer Vision  
+[LinkedIn](https://www.linkedin.com/in/archanaksnow) · [Email](mailto:archanaforstudy298@gmail.com)
