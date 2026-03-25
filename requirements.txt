@@ -1,0 +1,35 @@
+# AntiGravity Annotator — Python Dependencies
+# =============================================
+# Install:  pip install -r requirements.txt
+#
+# WHAT EACH PACKAGE DOES:
+#
+# --- Core Server ---
+fastapi>=0.104.0          # Web framework (routes, request handling)
+uvicorn[standard]>=0.24.0 # ASGI server (runs FastAPI, handles HTTP)
+python-multipart>=0.0.6   # Required for file upload (multipart/form-data)
+
+# --- Image Processing ---
+Pillow>=10.0.0            # Image validation and dimension reading
+# opencv-python            # Already installed on your server
+
+# --- AI/GPU ---
+ultralytics>=8.0.0        # YOLO/YOLOWorld/SAM model loading + inference
+#
+# torch is NOT listed here because the correct version depends on your CUDA version.
+# Install it separately BEFORE ultralytics:
+#
+#   CPU only:
+#     pip install torch torchvision
+#
+#   GPU — CUDA 12.1 (Tesla T4, RTX series):
+#     pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#
+#   GPU — CUDA 11.8:
+#     pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+#
+# ultralytics will use whichever torch is already installed.
+
+# --- Utilities ---
+numpy>=1.24.0             # Array ops for model results (.cpu().numpy() in server.py)
+# aiofiles               # Async file I/O (optional, for large file serving)
